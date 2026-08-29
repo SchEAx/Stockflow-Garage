@@ -1,5 +1,5 @@
-const CACHE_NAME = "garageflow-shell-v1-0-0";
-const SHELL_ASSETS = ["/", "/index.html", "/style.css?v=1.0.0", "/app.js?v=1.0.0", "/payroll-reminder.js?v=1.0.0", "/manifest.webmanifest", "/logo.png", "/icons/icon-192.png"];
+const CACHE_NAME = "garageflow-shell-v1-0-1";
+const SHELL_ASSETS = ["/", "/index.html", "/style.css?v=1.0.1", "/app.js?v=1.0.1", "/payroll-reminder.js?v=1.0.1", "/manifest.webmanifest", "/logo.png", "/icons/icon-192.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_ASSETS)).then(() => self.skipWaiting()));

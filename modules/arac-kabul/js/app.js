@@ -6408,6 +6408,15 @@ function setFullPayment(type) {
 };
 
     (async function init() {
+      const { data: authState } = await supabaseClient.auth.getSession();
+      if (!authState?.session) {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: "garageflow:auth-required", module: "arac-kabul" }, window.location.origin);
+        } else {
+          window.location.replace("/#arac-kabul");
+        }
+        return;
+      }
       state.searchDraft = state.search;
       await listeyiYenile();
       await reloadDailyReportData(state.selectedDate);

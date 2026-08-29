@@ -7,6 +7,9 @@ const MODULES = {
   anket: { title: "Müşteri Memnuniyet Anketi", url: "/modules/anket/index.html" }
 };
 const VAPID_PUBLIC_KEY = "BAi5RqXIHt50gvHTCOLT0XJxzW6f8OB_pYt_JN4nOKIIP8Cj9KkUu44hsLRZKLxxOKrZVdPFX_c5qc141bJt4Hc";
+const MAIN_SUPABASE_URL = "https://dmsovrbkoeivkvmlzals.supabase.co";
+const MAIN_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtc292cmJrb2Vpdmt2bWx6YWxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTg3NTMsImV4cCI6MjA5MjkzNDc1M30.Tf_8-AEkON4hvKsWiljiDV5z_LJW7KUebIkU-0R8x_A";
+const authClient = window.supabase.createClient(MAIN_SUPABASE_URL, MAIN_SUPABASE_KEY);
 
 const dashboard = document.getElementById("dashboard");
 const viewport = document.getElementById("moduleViewport");
@@ -17,6 +20,65 @@ const refreshButton = document.getElementById("refreshModuleButton");
 const openButton = document.getElementById("openModuleButton");
 const toast = document.getElementById("toast");
 let activeModule = "dashboard";
+let appStarted = false;
+
+function authEmailForUsername(username) {
+  const slug = String(username || "")
+    .trim().toLocaleLowerCase("tr-TR")
+    .replace(/ı/g, "i").replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s").replace(/ö/g, "o").replace(/ç/g, "c")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9._-]+/g, ".").replace(/^\.+|\.+$/g, "");
+  return `${slug || "personel"}@garage.local`;
+}
+
+function roleLabel(role) {
+  return ({ admin: "Admin", depo: "Depo", kasa: "Kasa", satis: "Satış", usta: "Usta" })[role] || role || "Personel";
+}
+
+async function loadGlobalProfile() {
+  const { data: authData, error: authError } = await authClient.auth.getUser();
+  if (authError || !authData?.user) throw authError || new Error("Oturum bulunamadı");
+  const { data, error } = await authClient.from("app_users").select("auth_user_id,username,name,role,is_active").eq("auth_user_id", authData.user.id).single();
+  if (error) throw error;
+  if (!data?.is_active) throw new Error("Bu personel hesabı pasif");
+  return data;
+}
+
+function showGlobalLogin(message = "") {
+  document.getElementById("globalLoginOverlay").classList.remove("hidden");
+  document.getElementById("globalAppShell").classList.add("auth-locked");
+  document.getElementById("globalLoginError").textContent = message;
+  setTimeout(() => document.getElementById("globalLoginUsername")?.focus(), 100);
+}
+
+function enterGarageFlow(profile) {
+  document.getElementById("globalLoginOverlay").classList.add("hidden");
+  document.getElementById("globalAppShell").classList.remove("auth-locked");
+  document.getElementById("globalUserPill").classList.remove("hidden");
+  document.getElementById("globalUserName").textContent = profile.name || profile.username || "Personel";
+  document.getElementById("globalUserRole").textContent = roleLabel(profile.role);
+  const canSeePayroll = profile.role === "admin";
+  document.querySelectorAll('[data-module="avans-maas"],[data-open-module="avans-maas"],[data-open-payroll]').forEach((element) => element.classList.toggle("hidden", !canSeePayroll));
+  const initialHash = location.hash.replace("#", "");
+  const savedModule = localStorage.getItem("garageflow_active_module");
+  let initialModule = MODULES[initialHash] ? initialHash : (MODULES[savedModule] ? savedModule : "dashboard");
+  if (!canSeePayroll && initialModule === "avans-maas") initialModule = "dashboard";
+  if (!appStarted) {
+    appStarted = true;
+    openModule(initialModule, false);
+  }
+}
+
+async function initializeGlobalAuth() {
+  try {
+    const { data } = await authClient.auth.getSession();
+    if (!data?.session) return showGlobalLogin();
+    enterGarageFlow(await loadGlobalProfile());
+  } catch (error) {
+    await authClient.auth.signOut({ scope: "local" }).catch(() => {});
+    showGlobalLogin(error.message || "Oturum açılamadı");
+  }
+}
 
 function showToast(message) {
   toast.textContent = message;
@@ -114,14 +176,46 @@ window.addEventListener("message", (event) => {
   if (event.data.type === "garageflow:module-title" && event.data.title) title.textContent = event.data.title;
   if (event.data.type === "garageflow:toast" && event.data.message) showToast(event.data.message);
   if (event.data.type === "garageflow:navigate" && MODULES[event.data.module]) openModule(event.data.module);
+  if (event.data.type === "garageflow:auth-required") showGlobalLogin("Oturum süresi doldu. Tekrar giriş yap.");
+});
+
+document.getElementById("globalLoginForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const username = document.getElementById("globalLoginUsername").value.trim();
+  const password = document.getElementById("globalLoginPassword").value;
+  const button = document.getElementById("globalLoginButton");
+  const errorBox = document.getElementById("globalLoginError");
+  if (!username || !password) { errorBox.textContent = "Kullanıcı adı ve şifre gerekli."; return; }
+  button.disabled = true;
+  button.textContent = "Giriş yapılıyor…";
+  errorBox.textContent = "";
+  try {
+    const { error } = await authClient.auth.signInWithPassword({ email: authEmailForUsername(username), password });
+    if (error) throw error;
+    const profile = await loadGlobalProfile();
+    document.getElementById("globalLoginPassword").value = "";
+    enterGarageFlow(profile);
+    showToast(`Hoş geldin ${profile.name || profile.username} ✅`);
+  } catch (error) {
+    await authClient.auth.signOut({ scope: "local" }).catch(() => {});
+    errorBox.textContent = error?.message === "Invalid login credentials" ? "Kullanıcı adı veya şifre hatalı." : (error.message || "Giriş yapılamadı.");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Giriş Yap";
+  }
+});
+
+document.getElementById("globalLogoutButton").addEventListener("click", async () => {
+  await authClient.auth.signOut();
+  frame.src = "about:blank";
+  frame.dataset.module = "";
+  appStarted = false;
+  showGlobalLogin("Oturum kapatıldı.");
 });
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js?v=1.0.0").catch(console.warn));
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js?v=1.0.1").catch(console.warn));
 }
 
-const initialHash = location.hash.replace("#", "");
-const savedModule = localStorage.getItem("garageflow_active_module");
-openModule(MODULES[initialHash] ? initialHash : (MODULES[savedModule] ? savedModule : "dashboard"), false);
-
 window.GarageFlow = { openModule, showToast };
+initializeGlobalAuth();
