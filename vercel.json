@@ -1,0 +1,11 @@
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/survey", "destination": "/modules/anket/survey.html" },
+    { "source": "/anket", "destination": "/modules/anket/survey.html" }
+  ],
+  "crons": [
+    { "path": "/api/payroll-reminder", "schedule": "0 6 * * *" }
+  ]
+}

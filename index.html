@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <title>GarageFlow | Garage İstanbul</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="stylesheet" href="/style.css?v=1.0.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/logo.png" alt="Garage İstanbul" onerror="this.style.display='none'" />
+        <div><strong>GarageFlow</strong><span>İşletme Yönetimi</span></div>
+      </div>
+
+      <nav class="module-nav" aria-label="Ana modüller">
+        <button class="module-button active" data-module="dashboard"><span>⌂</span><b>Ana Panel</b></button>
+        <button class="module-button" data-module="arac-kabul"><span>🚗</span><b>Araç Kabul</b></button>
+        <button class="module-button" data-module="stok"><span>📦</span><b>Genel Stok</b></button>
+        <button class="module-button" data-module="ekran-cerceve"><span>🖥️</span><b>Ekran & Çerçeve</b></button>
+        <button class="module-button" data-module="avans-maas"><span>₺</span><b>Avans & Maaş</b><i id="salaryNavBadge" class="nav-badge hidden">0</i></button>
+        <button class="module-button" data-module="anket"><span>★</span><b>Müşteri Anketi</b></button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>GarageFlow V1.0</span>
+        <small>Powered by SchEAx & GPT</small>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">GARAGE İSTANBUL</p>
+          <h1 id="moduleTitle">Ana Panel</h1>
+        </div>
+        <div class="header-actions">
+          <button id="notificationButton" class="icon-button" type="button" title="Maaş bildirimlerini aç">🔔 <span>Bildirim</span></button>
+          <button id="refreshModuleButton" class="icon-button hidden" type="button" title="Modülü yenile">↻ <span>Yenile</span></button>
+          <button id="openModuleButton" class="icon-button hidden" type="button" title="Yeni sekmede aç">↗ <span>Tam Ekran</span></button>
+        </div>
+      </header>
+
+      <section id="salaryAlert" class="salary-alert hidden" role="alert">
+        <div><strong>⏰ Maaş hatırlatması</strong><span id="salaryAlertText"></span></div>
+        <button type="button" data-open-payroll>Maaş ekranına git</button>
+      </section>
+
+      <section id="dashboard" class="dashboard-view">
+        <div class="hero-card">
+          <div>
+            <p class="eyebrow">TEK PROGRAM · MODÜLER YAPI</p>
+            <h2>İşletmenin tamamı tek ekranda.</h2>
+            <p>Araç kabulden montaja, stoktan maaşa kadar mevcut programların tek çatı altında.</p>
+          </div>
+          <div class="hero-mark">GF</div>
+        </div>
+
+        <div class="module-grid">
+          <button class="module-card emerald" data-open-module="arac-kabul"><span>🚗</span><div><strong>Araç Kabul</strong><small>Kayıt, montaj, sipariş, garanti ve gün sonu</small></div><i>→</i></button>
+          <button class="module-card blue" data-open-module="stok"><span>📦</span><div><strong>Genel Stok</strong><small>Barkod, giriş-çıkış, sipariş ve raporlar</small></div><i>→</i></button>
+          <button class="module-card purple" data-open-module="ekran-cerceve"><span>🖥️</span><div><strong>Ekran & Çerçeve</strong><small>Koli, raf, çerçeve ve multimedya stoğu</small></div><i>→</i></button>
+          <button class="module-card amber" data-open-module="avans-maas"><span>₺</span><div><strong>Avans & Maaş</strong><small>Avans kesintisi, maaş günü ve ödeme takibi</small></div><i>→</i></button>
+          <button class="module-card rose" data-open-module="anket"><span>★</span><div><strong>Müşteri Anketi</strong><small>Müşteri memnuniyeti ve geri bildirim</small></div><i>→</i></button>
+        </div>
+
+        <div class="flow-card">
+          <h3>Birleşik iş akışı</h3>
+          <div class="flow-steps">
+            <span>Araç Kabul</span><b>→</b><span>Stok Talebi</span><b>→</b><span>Montaj</span><b>→</b><span>Kasa</span><b>→</b><span>Anket</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="moduleViewport" class="module-viewport hidden">
+        <div id="moduleLoading" class="module-loading"><span></span>Modül açılıyor…</div>
+        <iframe id="moduleFrame" title="GarageFlow modülü" allow="camera; microphone; clipboard-read; clipboard-write" loading="eager"></iframe>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <script src="/app.js?v=1.0.0"></script>
+  <script src="/payroll-reminder.js?v=1.0.0"></script>
+</body>
+</html>
