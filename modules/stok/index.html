@@ -649,9 +649,10 @@ LED" rows="8"></textarea>
 </div>
 <p class="muted">Personel adı, rolü ve şifresini buradan düzenle. Bu alana giriş için Admin şifresi gerekir.</p>
 <div id="staffEditorBody"></div>
+<div class="staff-editor-message hidden" id="staffEditorMessage" role="status" aria-live="polite"></div>
 <div class="row-gap" style="margin-top:12px">
 <button class="btn secondary" onclick="addStaffEditorRow()" type="button">+ Personel Ekle</button>
-<button class="btn success" onclick="saveStaffEditor()" type="button">Kaydet</button>
+<button class="btn success" id="saveStaffEditorBtn" onclick="saveStaffEditor()" type="button">Kaydet</button>
 <button class="btn danger" onclick="resetStaffEditor()" type="button">Varsayılana Dön</button>
 </div>
 </div>
@@ -718,10 +719,10 @@ LED" rows="8"></textarea>
 <datalist id="carTypeList"></datalist>
 <datalist id="vehicleYearList"></datalist>
 <datalist id="locationList"></datalist>
-<script src="js/core.js"></script>
+<script src="js/core.js?v=3.13.2"></script>
 <script src="js/inventory.js"></script>
 <script src="js/sales-dashboard.js"></script>
-<script src="js/staff.js"></script>
+<script src="js/staff.js?v=3.13.2"></script>
 <script src="js/sales.js"></script>
 <script src="js/requests.js"></script>
 <script src="js/surveys.js"></script>
@@ -731,6 +732,6 @@ LED" rows="8"></textarea>
 <script src="js/reports.js"></script>
 <script src="js/events.js"></script>
 <script src="js/excel.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=3.13.2"></script>
 </body>
 </html>

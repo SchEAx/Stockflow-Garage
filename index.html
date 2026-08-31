@@ -4,10 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="Garage İstanbul araç kabul, stok, ekran-çerçeve, avans-maaş ve müşteri anketi yönetimi." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GarageFlow" />
   <title>GarageFlow | Garage İstanbul</title>
   <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-  <link rel="stylesheet" href="/style.css?v=1.0.1" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="/style.css?v=1.0.2" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -41,7 +47,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <span>GarageFlow V1.0.1</span>
+        <span>GarageFlow V1.0.2</span>
         <small>Powered by SchEAx & GPT</small>
       </div>
     </aside>
@@ -54,6 +60,8 @@
         </div>
         <div class="header-actions">
           <div id="globalUserPill" class="global-user-pill hidden"><span>👤</span><div><strong id="globalUserName">-</strong><small id="globalUserRole">-</small></div></div>
+          <button id="installAppButton" class="icon-button install-button hidden" type="button" title="GarageFlow'u bu cihaza kur">⬇ <span>Uygulamayı Kur</span></button>
+          <button id="updateAppButton" class="icon-button update-button hidden" type="button" title="Yeni GarageFlow sürümünü yükle">✨ <span>Güncelle</span></button>
           <button id="notificationButton" class="icon-button" type="button" title="Maaş bildirimlerini aç">🔔 <span>Bildirim</span></button>
           <button id="refreshModuleButton" class="icon-button hidden" type="button" title="Modülü yenile">↻ <span>Yenile</span></button>
           <button id="openModuleButton" class="icon-button hidden" type="button" title="Yeni sekmede aç">↗ <span>Tam Ekran</span></button>
@@ -100,7 +108,7 @@
   </div>
 
   <div id="toast" class="toast" aria-live="polite"></div>
-  <script src="/app.js?v=1.0.1"></script>
-  <script src="/payroll-reminder.js?v=1.0.1"></script>
+  <script src="/app.js?v=1.0.2"></script>
+  <script src="/payroll-reminder.js?v=1.0.2"></script>
 </body>
 </html>

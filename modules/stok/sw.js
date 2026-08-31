@@ -1,4 +1,4 @@
-const CACHE_NAME = "garage-stock-v3-13-0-mobile-card-detail";
+const CACHE_NAME = "garage-stock-v3-13-2-staff-auth-cache-fix";
 const ASSETS = [
   "./",
   "./index.html",

@@ -1,5 +1,5 @@
 // Core: yapılandırma, state, DOM, yetkiler, bildirimler ve ortak yardımcılar
-const APP_VERSION = '3.12.0-grouped-stock-audit';
+const APP_VERSION = '3.13.2-staff-auth-cache-fix';
 let isOffline = !navigator.onLine;
 let globalLoading = false;
 
@@ -1325,4 +1325,3 @@ window.addEventListener("popstate", () => {
     closeProductImageModal(true);
   }
 });
-

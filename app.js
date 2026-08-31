@@ -21,6 +21,89 @@ const openButton = document.getElementById("openModuleButton");
 const toast = document.getElementById("toast");
 let activeModule = "dashboard";
 let appStarted = false;
+let deferredInstallPrompt = null;
+let waitingServiceWorker = null;
+let updateReloadRequested = false;
+
+const installAppButton = document.getElementById("installAppButton");
+const updateAppButton = document.getElementById("updateAppButton");
+
+function isStandaloneMode() {
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function isIosDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function syncInstallButton() {
+  const canOfferInstall = !isStandaloneMode() && (deferredInstallPrompt || isIosDevice());
+  installAppButton?.classList.toggle("hidden", !canOfferInstall);
+}
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  syncInstallButton();
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  syncInstallButton();
+  showToast("GarageFlow bu cihaza kuruldu ✅");
+});
+
+installAppButton?.addEventListener("click", async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    syncInstallButton();
+    if (outcome === "accepted") showToast("GarageFlow kuruluyor…");
+    return;
+  }
+  if (isIosDevice()) {
+    showToast("Safari’de Paylaş simgesine, ardından ‘Ana Ekrana Ekle’ye bas.");
+    return;
+  }
+  showToast("Tarayıcı menüsünden ‘Uygulamayı yükle’ seçeneğini kullanabilirsin.");
+});
+
+function offerPwaUpdate(worker) {
+  waitingServiceWorker = worker;
+  updateAppButton?.classList.remove("hidden");
+  showToast("GarageFlow’un yeni sürümü hazır ✨");
+}
+
+updateAppButton?.addEventListener("click", () => {
+  if (!waitingServiceWorker) return;
+  updateReloadRequested = true;
+  updateAppButton.disabled = true;
+  updateAppButton.querySelector("span").textContent = "Yükleniyor";
+  waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+});
+
+async function registerGarageFlowPwa() {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js?v=1.0.2");
+    if (registration.waiting && navigator.serviceWorker.controller) offerPwaUpdate(registration.waiting);
+    registration.addEventListener("updatefound", () => {
+      const worker = registration.installing;
+      worker?.addEventListener("statechange", () => {
+        if (worker.state === "installed" && navigator.serviceWorker.controller) offerPwaUpdate(worker);
+      });
+    });
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!updateReloadRequested) return;
+      updateReloadRequested = false;
+      location.reload();
+    });
+    setTimeout(() => registration.update().catch(() => {}), 4000);
+  } catch (error) {
+    console.warn("GarageFlow PWA kaydı yapılamadı", error);
+  }
+}
 
 function authEmailForUsername(username) {
   const slug = String(username || "")
@@ -213,9 +296,10 @@ document.getElementById("globalLogoutButton").addEventListener("click", async ()
   showGlobalLogin("Oturum kapatıldı.");
 });
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js?v=1.0.1").catch(console.warn));
-}
+window.addEventListener("load", () => {
+  syncInstallButton();
+  registerGarageFlowPwa();
+});
 
 window.GarageFlow = { openModule, showToast };
 initializeGlobalAuth();
